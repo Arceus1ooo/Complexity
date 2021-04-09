@@ -70,3 +70,20 @@ function depth()
    console.log();
    return;
 }
+
+function test()
+{
+   if (true)
+   {
+      if(true)
+      {
+         if(true)
+         {
+            if(true)
+            {
+               
+            }
+         }
+      }
+   }
+}

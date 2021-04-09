@@ -8,7 +8,7 @@ function main()
 
 	if( args.length == 0 )
 	{
-		args = ["analysis.js"];
+		args = ["mystery.js"];
 	}
 	var filePath = args[0];
 	
@@ -35,7 +35,7 @@ function FunctionBuilder()
 	// The number of parameters for functions
 	this.ParameterCount  = 0,
 	// Number of if statements/loops + 1
-	this.SimpleCyclomaticComplexity = 0;
+	this.SimpleCyclomaticComplexity = 1;
 	// The max depth of scopes (nested ifs, loops, etc)
 	this.MaxNestingDepth    = 0;
 	// The max number of conditions if one decision statement.
@@ -113,6 +113,9 @@ function complexity(filePath)
 	builders[filePath] = fileBuilder;
 
 	// Tranverse program with a function visitor.
+	var name = '';
+	var counter = 0;
+	var depthCounter = 0;
 	traverseWithParents(ast, function (node) 
 	{
 		if (node.type === 'FunctionDeclaration') 
@@ -120,13 +123,64 @@ function complexity(filePath)
 			var builder = new FunctionBuilder();
 
 			builder.FunctionName = functionName(node);
+			builder.ParameterCount = countParams(node);
 			builder.StartLine    = node.loc.start.line;
 
 			builders[builder.FunctionName] = builder;
+			name = builder.FunctionName;
+		}
+
+		if (node.type == 'String' && typeof node.value == 'string')
+		{
+			builders[filePath].Strings++;
+		}
+
+		if (isDecision(node) && name != '')
+		{
+			builders[name].SimpleCyclomaticComplexity++;
+		}
+
+		if (node.type === "LogicalExpression" && ((node.operator === "&&") || (node.operator === "||")))
+		{
+			counter++;
+		}
+		else if (name != '')
+		{
+			if (counter > builders[name].MaxConditions)
+			{
+				builders[name].MaxConditions = counter;
+			}
+			counter = 0;
+		}
+
+		//count consequents
+		depthCounter = findChildren(node, 0);
+		if (name != '')
+		{
+			if (depthCounter > builders[name].MaxNestingDepth)
+			{
+				builders[name].MaxNestingDepth = depthCounter;
+			}
 		}
 
 	});
 
+}
+
+function findChildren(node, acc)
+{
+	if (node.consequent != undefined)
+	{
+		for (var i = 0; i < node.consequent.body.length; i++)
+		{
+			if (node.consequent.body[i].consequent != undefined)
+			{
+				return findChildren(node.consequent.body[i], acc + 1);
+			}
+		}
+	}
+	
+	return acc;
 }
 
 // Helper function for counting children of node.
@@ -153,14 +207,15 @@ function childrenLength(node)
 function isDecision(node)
 {
 	if( node.type == 'IfStatement' || node.type == 'ForStatement' || node.type == 'WhileStatement' ||
-		 node.type == 'ForInStatement' || node.type == 'DoWhileStatement')
+		 node.type == 'ForInStatement' || node.type == 'DoWhileStatement' || node.type == 'SwitchStatement' ||
+		 node.type == 'ForOfStatement')
 	{
 		return true;
 	}
 	return false;
 }
 
-// Helper function for printing out function name.
+// Helper function for printing out function parameters.
 function functionName( node )
 {
 	if( node.id )
@@ -168,6 +223,15 @@ function functionName( node )
 		return node.id.name;
 	}
 	return "anon function @" + node.loc.start.line;
+}
+
+function countParams( node )
+{
+	if( node.params )
+	{
+		return node.params.length;
+	}
+	return "anon parameter @" + node.loc.start.line;
 }
 
 // Helper function for allowing parameterized formatting of strings.
