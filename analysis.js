@@ -6,7 +6,7 @@ function main()
 {
 	var args = process.argv.slice(2);
 
-	if( args.length ==
+	if( args.length == 0)
 	{
 		args = ["mystery.js"];
 	}
