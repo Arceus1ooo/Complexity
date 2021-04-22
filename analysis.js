@@ -6,7 +6,7 @@ function main()
 {
 	var args = process.argv.slice(2);
 
-	if( args.length == 0 )
+	if( args.length ==
 	{
 		args = ["mystery.js"];
 	}
@@ -154,14 +154,14 @@ function complexity(filePath)
 		}
 
 		//count consequents
-		depthCounter = findChildren(node, 0);
+		/*depthCounter = findChildren(node, 0);
 		if (name != '')
 		{
 			if (depthCounter > builders[name].MaxNestingDepth)
 			{
 				builders[name].MaxNestingDepth = depthCounter;
 			}
-		}
+		}*/
 
 	});
 
