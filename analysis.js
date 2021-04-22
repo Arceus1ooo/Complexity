@@ -167,7 +167,7 @@ function complexity(filePath)
 
 }
 
-function findChildren(node, acc)
+/*function findChildren(node, acc)
 {
 	if (node.consequent != undefined)
 	{
@@ -181,7 +181,7 @@ function findChildren(node, acc)
 	}
 	
 	return acc;
-}
+}*/
 
 // Helper function for counting children of node.
 function childrenLength(node)
