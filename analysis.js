@@ -167,6 +167,31 @@ function complexity(filePath)
 
 }
 
+function getStrings(filePath)
+{
+	var buf = fs.readFileSync(filePath, "utf8");
+	var ast = esprima.parse(buf, options);
+
+	// A file level-builder:
+	var fileBuilder = new FileBuilder();
+	fileBuilder.FileName = filePath;
+	fileBuilder.ImportCount = 0;
+	builders[filePath] = fileBuilder;
+
+	// Tranverse program with a function visitor.
+	var name = '';
+	var counter = 0;
+
+	traverseWithParents(ast, function (node) 
+	{
+		if (node.type == 'Literal')
+		{
+			builders[filePath].Strings++;
+		}
+	});
+	return builders[filePath].Strings;
+}
+
 /*function findChildren(node, acc)
 {
 	if (node.consequent != undefined)
@@ -340,3 +365,4 @@ mints.toString().split(".")[0] + " " + szmin;
       }
   }
  exports.complexity = complexity;
+ exports.getStrings = getStrings;
